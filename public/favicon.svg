@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="ask" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff3b30"/>
+      <stop offset="100%" stop-color="#b80000"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="12" fill="#080808"/>
+  <rect x="2" y="2" width="44" height="44" rx="10" fill="url(#ask)"/>
+  <text x="24" y="33" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="17" letter-spacing="-1" fill="white">ASK</text>
+</svg>

@@ -1,0 +1,139 @@
+import React, { useEffect } from 'react'
+import Preloader from './components/Preloader'
+import Navbar from './components/Navbar'
+import Hero from './components/Hero'
+import About from './components/About'
+import TechnicalSkills from './components/TechnicalSkills'
+import Services from './components/Services'
+import Projects from './components/Projects'
+import ContentCreator from './components/ContentCreator'
+import Leadership from './components/Leadership'
+import SoftSkills from './components/SoftSkills'
+import Contact from './components/Contact'
+import Footer from './components/Footer'
+import SkillUniverse from './components/SkillUniverse'
+import InteractiveTerminal from './components/InteractiveTerminal'
+import RecruiterSnapshot from './components/RecruiterSnapshot'
+import ProjectCaseStudies from './components/ProjectCaseStudies'
+function WorldChapter({ children, className = '' }) {
+  return <div className={`world-chapter ${className}`}>{children}</div>
+}
+
+function CinematicScroll() {
+  useEffect(() => {
+    const root = document.documentElement
+    let raf = 0
+    let running = true
+    let targetScroll = window.scrollY || 0
+    let smoothScroll = targetScroll
+    let previousSmooth = smoothScroll
+    let lastTime = performance.now()
+    let velocity = 0
+
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
+    const lerp = (a, b, t) => a + (b - a) * t
+
+    const updateTarget = () => {
+      targetScroll = window.scrollY || window.pageYOffset || 0
+    }
+
+    const render = (time) => {
+      if (!running) return
+      const dt = Math.min(32, time - lastTime || 16.67)
+      lastTime = time
+
+      // A soft spring follows the browser scroll position instead of snapping to it.
+      const follow = 1 - Math.pow(0.001, dt / 1000)
+      smoothScroll = lerp(smoothScroll, targetScroll, follow * 0.72)
+      if (Math.abs(targetScroll - smoothScroll) < 0.08) smoothScroll = targetScroll
+
+      const rawVelocity = (smoothScroll - previousSmooth) / Math.max(dt, 1) * 16.67
+      velocity = lerp(velocity, rawVelocity, 0.14)
+      previousSmooth = smoothScroll
+
+      const vh = window.innerHeight || 1
+      const chapters = document.querySelectorAll('.world-chapter')
+
+      chapters.forEach((el, index) => {
+        const r = el.getBoundingClientRect()
+        const center = r.top + r.height / 2
+        const distance = (center - vh / 2) / Math.max(vh * 0.92, r.height * 0.72)
+        const d = clamp(distance, -1.45, 1.45)
+        const abs = Math.min(1.45, Math.abs(d))
+        const near = Math.max(0, 1 - abs)
+
+        // The page behaves like a camera moving through depth, not cards sliding past each other.
+        const y = d * -16
+        const z = near * 10 - abs * 42
+        const rotateX = d * -1.15
+        const rotateY = Math.sin(d * Math.PI * 0.5) * 0.55
+        const scale = 0.972 + near * 0.028
+        const blur = Math.max(0, abs - 0.82) * 1.65
+        const opacity = 0.82 + near * 0.18
+        const saturate = 0.88 + near * 0.12
+
+        // Velocity gives the camera a tiny amount of inertia while staying restrained.
+        const drift = clamp(velocity * 0.7, -4.5, 4.5)
+        const edgeGlow = Math.max(0, 1 - Math.abs(d) * 1.55)
+
+        el.style.setProperty('--world-y', `${(y + drift).toFixed(2)}px`)
+        el.style.setProperty('--world-z', `${z.toFixed(2)}px`)
+        el.style.setProperty('--world-rotate-x', `${rotateX.toFixed(3)}deg`)
+        el.style.setProperty('--world-rotate-y', `${rotateY.toFixed(3)}deg`)
+        el.style.setProperty('--world-scale', scale.toFixed(4))
+        el.style.setProperty('--world-blur', `${blur.toFixed(2)}px`)
+        el.style.setProperty('--world-opacity', opacity.toFixed(3))
+        el.style.setProperty('--world-saturate', saturate.toFixed(3))
+        el.style.setProperty('--world-edge', edgeGlow.toFixed(3))
+        el.style.setProperty('--world-index', index)
+      })
+
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - vh)
+      const progress = clamp(smoothScroll / maxScroll, 0, 1)
+      root.style.setProperty('--scroll-progress', progress)
+      root.style.setProperty('--scroll-velocity', clamp(Math.abs(velocity) / 8, 0, 1))
+      root.style.setProperty('--camera-drift', `${clamp(velocity * 0.18, -1.5, 1.5).toFixed(2)}deg`)
+
+      raf = requestAnimationFrame(render)
+    }
+
+    updateTarget()
+    window.addEventListener('scroll', updateTarget, { passive: true })
+    window.addEventListener('resize', updateTarget)
+    raf = requestAnimationFrame(render)
+
+    return () => {
+      running = false
+      window.removeEventListener('scroll', updateTarget)
+      window.removeEventListener('resize', updateTarget)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+  return null
+}
+function App() {
+  return (
+    <>
+      <Preloader />
+      <CinematicScroll />
+      <div className="world-chrome" aria-hidden="true"><span className="world-chrome-line"/><span className="world-chrome-dot"/></div>
+      <Navbar />
+      <WorldChapter><Hero /></WorldChapter>
+      <WorldChapter><About /></WorldChapter>
+      <WorldChapter><RecruiterSnapshot /></WorldChapter>
+      <WorldChapter><TechnicalSkills /></WorldChapter>
+      <WorldChapter className="world-portal"><SkillUniverse /></WorldChapter>
+      <WorldChapter><InteractiveTerminal /></WorldChapter>
+      <WorldChapter><Services /></WorldChapter>
+      <WorldChapter><Projects /></WorldChapter>
+      <WorldChapter><ProjectCaseStudies /></WorldChapter>
+      <WorldChapter><ContentCreator /></WorldChapter>
+      <WorldChapter><Leadership /></WorldChapter>
+      <WorldChapter><SoftSkills /></WorldChapter>
+      <WorldChapter><Contact /></WorldChapter>
+      <WorldChapter><Footer /></WorldChapter>
+    </>
+  )
+}
+
+export default App
